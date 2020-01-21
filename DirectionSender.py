@@ -72,7 +72,6 @@ class DirectionSender():
 
 def main():
     d = DirectionSender()
-
     rospy.spin()
 
 if __name__ == '__main__':
