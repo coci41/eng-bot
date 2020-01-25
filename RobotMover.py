@@ -11,7 +11,7 @@ class RobotMover():
 
     def __init__(self):
 
-        self.robot = gpiozero.Robot(left=(24, 23, 25), right=(22, 27, 17))
+        self.robot = gpiozero.Robot(left=(27, 22, 17), right=(23, 24, 25))
         self.forward_speed = 0.35
         self.turn_speed = 0.3
 
