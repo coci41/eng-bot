@@ -1,0 +1,15 @@
+PIN Raspberry
+
+MOTORI:
+GPIO17 - Giallo - ENA
+GPIO25 - Bianco - ENB
+GPIO27 - Verde - IN1
+GPIO22 - Blu - IN2
+GPIO23 - Grigio Scuro - IN3
+GPIO24 - Viola - IN4
+
+SONAR:
+GPIO26 - Verde - ECHO LEFT
+GPIO19 - Marrone - ECHO MIDDLE
+GPIO13 - Arancione - ECHO RIGHT
+GPIO4 - Bianco - TRIGGER
