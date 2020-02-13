@@ -58,17 +58,17 @@ class DirectionSender():
         if data:
             if (data[0] > self.minimum_area) and (data[0] < self.maximum_area):
                 if data[1] > (self.center_image_x + (self.image_width / 3)):
-                    self.pub.publish("DX")
+                    self.pub.publish('DX')
                 elif data[1] < (self.center_image_x - (self.image_width / 3)):
-                    self.pub.publish("SX")
+                    self.pub.publish('SX')
                 else:
-                    self.pub.publish("AVANTI")
+                    self.pub.publish('AVANTI')
             elif (data[0] < self.minimum_area):
-                self.pub.publish("TOOSMALL")
+                self.pub.publish('TOOSMALL')
             else:
-                self.pub.publish("FOUND")
+                self.pub.publish('FOUND')
         else:
-            self.pub.publish("NOTFOUND")
+            self.pub.publish('NOTFOUND')
 
 def main():
     d = DirectionSender()
