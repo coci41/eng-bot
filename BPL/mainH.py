@@ -45,13 +45,14 @@ class Azione:
         self.sonar_sx = data.data
 
     # ***************** GUIDA DIFFERENZIALE ***********************
-    #la guida differenziale e' stata spiegata ampiamente nella relazione
+    #la guida differenziale e' stata spiegata ampiamente nella relazione - la X è l'angolo e la m è l'istanza della classe motore
     def movimentoDefault(self, X, m):
         v_dx = 49.66585 + 0.01731602 * X + 0.001274749 * (X ** 2) - 0.00004329004 * (X ** 3)
         v_sx = 49.66585 - 0.01731602 * X + 0.001274749 * (X ** 2) + 0.00004329004 * (X ** 3)
         m.avanti(duty_cycle_dx=v_dx, duty_cycle_sx=v_sx)
         return 1
 
+    # nel caso dell'ostacolo inverto i valori di dx e sx e vado in direzione opposta a quella che suggerisce il centroide
     def movimentoOstacolo(self, X, m):
         v_dx = 49.66585 + 0.01731602 * X + 0.001274749 * (X ** 2) - 0.00004329004 * (X ** 3)
         v_sx = 49.66585 - 0.01731602 * X + 0.001274749 * (X ** 2) + 0.00004329004 * (X ** 3)
@@ -67,6 +68,7 @@ def main():
     a = Azione()
 
     #******* COMPORTAMENTO REATTIVO DEL ROBOT ********
+    # CERCARE rospyshutdown finchè il canale è aperto
     while not rospy.is_shutdown():
          #l'infrarosso ha priorita' maggiore, e' posizionato avanti
         if (a.ir_0 == 0):
@@ -94,11 +96,8 @@ def main():
 
         #se nessuno dei sensori si attiva, seguendo le linee bianche, prova a raggiungere la coordinata successiva
         else:
-            print()
-            # vai verso path[next_point] #vai verso il punto successivo
-            # if (path[next_point] e' stato raggiunto):   #per raggiunto intendiamo entra in un range dentro la coordinata
-                #next_point += 1
-            # M = a.movimentoDefault(a.default,m)
+            print("Movimento Default")
+            M = a.movimentoDefault(a.default,m)
 
         time.sleep(0.1)
 

@@ -20,6 +20,7 @@ class motor:
 
         GPIO.setmode(GPIO.BCM)
 
+        #CERCARE GPIO.OUT e SETUP
         GPIO.setup(in1_dx, GPIO.OUT)
         GPIO.setup(in2_dx, GPIO.OUT)
         GPIO.setup(en_dx, GPIO.OUT)
@@ -32,6 +33,7 @@ class motor:
         GPIO.output(in1_sx, GPIO.LOW)
         GPIO.output(in2_sx, GPIO.LOW)
 
+        #CERCARE PWN (funzione del motore - slide Chella - potenza del segnale - segnale può essere alto o basso, non ci sono valori intermedi)
         self.p_dx = GPIO.PWM(en_dx, 1000)
         self.p_sx = GPIO.PWM(en_sx, 1000)
 
@@ -40,6 +42,7 @@ class motor:
 
     def stop(self, duty_cycle=None):
 
+        # CERCARE dutycycle (effettiva potenza del motore)
         if duty_cycle != None:
             self.p_dx.ChangeDutyCycle(duty_cycle)
             self.p_sx.ChangeDutyCycle(duty_cycle)
@@ -51,6 +54,8 @@ class motor:
 
     def indietro(self, duty_cycle_dx=None, duty_cycle_sx=None):
 
+        # CERCARE ChangeDutyCycle
+        # imposto prima la potenza del motore con ChangeDutyCycle e poi gli dico se andare avanti o indietro
         if duty_cycle_dx != None and duty_cycle_sx != None:
             self.p_dx.ChangeDutyCycle(duty_cycle_dx)
             self.p_sx.ChangeDutyCycle(duty_cycle_sx)

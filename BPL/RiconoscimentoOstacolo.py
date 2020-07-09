@@ -13,7 +13,7 @@ from std_msgs.msg import Float32
 class Recognition:
 
     def __init__(self):
-        # Viene settata una misura per la distanza critica
+        # Viene settata una misura per la distanza critica - 25 dovrebbe essere la distanza dall'oggetto
         self.DISTANZA_CRITICA = 25
         self.bridge = CvBridge()
         self.pub = rospy.Publisher('ostacolo', Float32, queue_size=1)
@@ -30,11 +30,14 @@ class Recognition:
             lower = (31, 159, 110)
             upper = (68, 255, 255)
 
+            # trasforma in HSV
             color = cv2.cvtColor(cv_img, cv2.COLOR_BGR2HSV)
             # Settiamo il range di colori da riconoscere
             mask = cv2.inRange(color, lower, upper)
+            # applica all'immagine la maschera in AND e trova solo le parti comuni - ti restituisce solo le parti verdi
             target = cv2.bitwise_and(cv_img, cv_img, mask=mask)
 
+            # trasforma in bianco e nero - PROVA?
             gray = cv2.cvtColor(target, cv2.COLOR_BGR2GRAY)
             cv2.imshow('IMG', gray)
             # Prendiamo tutti i contorni di tutti gli ostacoli che riconosce
@@ -82,8 +85,11 @@ class Recognition:
             print(e)
 
     def distance_to_camera(self, x):
-        # L'ostacolo viene riconosciuto in base alla funzione definita interpolando dei campioni (Ostacolo,Distanza),
+        # L'ostacolo viene riconosciuto in base alla funzione definita interpolando dei campioni (Ostacolo,Distanza), sarebbe (Area, Distanza)
 		# e che dunque associa ad un'area una distanza.
+
+        # CERCARE - distanza in base all'area
+        # mappo sperimentalmente quanto misura l'area a distanze diverse, creo una funzione e questa sotto è la funzione che pessa per quei punti
         if x != 0:
             return -132.5719 + (131738.3 - -132.5719) / (1 + (x / 1.901842e-16) ** 0.1476739)
         else:
