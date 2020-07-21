@@ -18,7 +18,7 @@ class Camera:
         self.dev.set(4,240)
     #Lancio un nodo ROS che pubblica sul topic "frame" un messaggio di tipo CompressedImage - scelto piuttosto che immagine standard
     #cosi da velocizzare la trasmissione
-        rospy.Publisher('image', CompressedImage, queue_size=1)
+        self.pub = rospy.Publisher('image', CompressedImage, queue_size=1)
         rospy.init_node('camera_node', anonymous=True)
         rate = rospy.Rate(10)
 
