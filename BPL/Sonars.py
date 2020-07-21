@@ -9,8 +9,8 @@ from time import sleep
 
 GPIO.setmode(GPIO.BCM)
 #Creo due array in cui l'i-esimo trigger sara' associato all'i-esimo echo - nei sonar si usano due pin
-trigger_pins = [4, 4]
-echo_pins = [13, 26]
+trigger_pins = [20, 12]
+echo_pins = [21, 16]
 
 
 class SonarNode:

@@ -14,7 +14,7 @@ def getRange():
     # Load in image
     #image = cv2.imread('Img2/prima.png')
 
-    camera = cam.CameraImage()
+    camera = cam.Camera()
 
 
     # Create a window
@@ -42,7 +42,7 @@ def getRange():
 
     while(1):
 
-        image = camera.get_image()
+        image = camera.readAndPublishFrame()
 
         # get current positions of all trackbars
         hMin = cv2.getTrackbarPos('HMin','image')

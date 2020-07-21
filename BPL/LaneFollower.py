@@ -11,14 +11,14 @@ from std_msgs.msg import Float32
 
 #E' spiegato nel paragrafo della guida differenziale
 
-class ComportamentoDefault:
+class LaneFollower:
 
     def __init__(self):
         # Istanzio l'oggetto CvBridge che mi permettera la conversione da compressed image a un'immagine cv2
         self.bridge = CvBridge()
-        self.sub = rospy.Subscriber("frame", CompressedImage, self.callback)
-        self.pub = rospy.Publisher('seguiLinea', Float32, queue_size=1)
-        rospy.init_node('comportamentoDefault', anonymous=True)
+        self.sub = rospy.Subscriber("image", CompressedImage, self.callback)
+        self.pub = rospy.Publisher('lane_follower', Float32, queue_size=1)
+        rospy.init_node('lane_follower_node', anonymous=True)
         # CERCARE - frequenza pubblicazione
         rate = rospy.Rate(10)
 
@@ -42,44 +42,44 @@ class ComportamentoDefault:
                     # Considero le porzioni nere di immagine con area maggiore di 400, per non considerare dettagli irrilevanti
                     if cv2.contourArea(c) > 400:
                         # CERCARE TUTTA STA PARTE DEI MOMENTI!!!!! - momenti - servono per calcolare il centroide
-                        M = cv2.moments(c)
-                        if M["m00"] != 0:
-                            # cX e cY sono le coordinate del centroide
-                            cX = int(M["m10"] / M["m00"])
-                            cY = int(M["m01"] / M["m00"])
+                        moments = cv2.moments(c)
+                        if moments["m00"] != 0:
+                            # centroideX e centroideY sono le coordinate del centroide
+                            centroideX = int(moments["m10"] / moments["m00"])
+                            centroideY = int(moments["m01"] / moments["m00"])
                             # Effettuo un taglio orizzontale dell'immagine per rilevare solo i centroidi all'interno della pista
                             # 120 è un valore che equivale ad un punto basso nell'immagine, così da evitare centroidi che non c'entrano con la pista e le linee
-                            if cY > 120:
+                            if centroideY > 120:
                                 # CERCARE - dovrebbe costruire le linee verdi attorno al centroide
                                 (minAreaRect) = cv2.minAreaRect(c)
                                 box = cv2.boxPoints(minAreaRect)
                                 box = np.int0(box)
                                 cv2.drawContours(frame, [box], -1, (0, 255, 0), 2)
                                 # Costruisco un punto che contenga le coordinate del centroide e lo inserisco nella lista dei centroidi rilevati
-                                point = (cX, cY)
+                                point = (centroideX, centroideY)
                                 # Ho un array di centroidi perchè posso avere più centroidi se intercetto più linee
                                 centre.append(point)
                         else:
                             # Caso in cui non riconosce alcuna area nera
-                            cX, cY = 0, 0
+                            centroideX, centroideY = 0, 0
 
                 #queste variabili serviranno dopo a fare la media dei centroidi
-                sumX = 0
-                sumY = 0
+                totalX = 0
+                totalY = 0
                 #Iterando, calcolo la media di tutti i centroidi acquisiti - faccio la media, sommo tutti e poi divido per la lunghezza dell'array
                 for i in range(len(centre)):
                     X, Y = centre[i]
-                    sumX += X
-                    sumY += Y
+                    totalX += X
+                    totalY += Y
 
                 if len(centre):
-                    X = sumX / len(centre)
-                    Y = sumY / len(centre)
+                    X = totalX / len(centre)
+                    Y = totalY / len(centre)
                     # Traslo le coordinate in modo da settare idealmente il centro dell'immagine in basso al centro (non in alto a sx come da Default)
-                    X_new = X - 160
-                    Y_new = 240 - Y
+                    X_trasl = X - 160
+                    Y_trasl = 240 - Y
                     # Calcolo l'angolo del centroide rispetto al nuovo sistema di assi - arcotangente dei due punti
-                    angle = math.atan2(X_new, Y_new)
+                    angle = math.atan2(X_trasl, Y_trasl)
                 else:
                     # Caso in cui l'array dei centroidi e' vuoto
                     X = 0
@@ -102,7 +102,7 @@ class ComportamentoDefault:
 
 
 def main():
-    d = ComportamentoDefault()
+    d = LaneFollower()
     rospy.spin()
 
 
