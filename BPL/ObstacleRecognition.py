@@ -10,15 +10,15 @@ from std_msgs.msg import Float32
 #questa classe legge dal topic 'frame', una volta elaborato con il range HSV desiderato, pubblica nel topic 'ostacolo'
 # l'angolo del centroide solo nel caso in cui l'ostacolo riconosciuto supera una certa distanza.
 
-class Recognition:
+class ObstacleRecognition:
 
     def __init__(self):
         # Viene settata una misura per la distanza critica - 25 dovrebbe essere la distanza dall'oggetto
         self.DISTANZA_CRITICA = 25
         self.bridge = CvBridge()
-        self.pub = rospy.Publisher('ostacolo', Float32, queue_size=1)
-        self.sub = rospy.Subscriber("frame", CompressedImage, self.callback)
-        rospy.init_node('riconoscimento_ostacolo', anonymous=True)
+        self.pub = rospy.Publisher('obstacle_recognition', Float32, queue_size=1)
+        self.sub = rospy.Subscriber("image", CompressedImage, self.callback)
+        rospy.init_node('obstacle_recognition_node', anonymous=True)
         rate = rospy.Rate(10)
 
     def callback(self, data):
@@ -53,28 +53,28 @@ class Recognition:
                 box = np.int0(cv2.boxPoints(d))
                 # Calcoliamo l'area della bounding box
                 area = cv2.contourArea(box)
-                M = cv2.moments(c)
-                if M["m00"] != 0:
+                moments = cv2.moments(c)
+                if moments["m00"] != 0:
                     # coordinate del centroide rispetto l'asse X e Y
-                    cX = int(M["m10"] / M["m00"])
-                    cY = int(M["m01"] / M["m00"])
+                    centroideX = int(moments["m10"] / moments["m00"])
+                    centroideY = int(moments["m01"] / moments["m00"])
                     # Traslo le coordinate in modo da settare idealmente il centro dell'immagine in basso al centro (non in alto a sx come da Default)
-                    cX_new = cX - 160
-                    cY_new = 240 - cY
-                    angle = math.atan2(cX_new, cY_new)
+                    X_trasl = centroideX - 160
+                    Y_trasl = 240 - centroideY
+                    angle = math.atan2(X_trasl, Y_trasl)
                 else:
-                    cX = -1
-                    cY = -1
+                    centroideX = -1
+                    centroideY = -1
                     angle = 1000
                 # Ritorna a partire dall'area, la distanza
-                dis = self.distance_to_camera(area)
+                dis = self.distanceToCamera(area)
 
                 cv2.drawContours(cv_img, [box], -1, (255, 255, 255), 2)
-                cv2.circle(cv_img, (cX, cY), 7, (255, 255, 255), -1)
+                cv2.circle(cv_img, (centroideX, centroideY), 7, (255, 255, 255), -1)
 
                 # Il nodo pubblichera' se e solo se la vicinanza dell'ostacolo e' minore della distanza critica e se e'
                 # stato rilevato un oggetto
-                if dis < self.DISTANZA_CRITICA and cX != -1 and cY != -1:
+                if dis < self.DISTANZA_CRITICA and centroideX != -1 and centroideY != -1:
                     self.pub.publish(angle * 180 / math.pi)
 
             cv2.imshow("draw_image", cv_img)
@@ -84,7 +84,7 @@ class Recognition:
         except CvBridgeError as e:
             print(e)
 
-    def distance_to_camera(self, x):
+    def distanceToCamera(self, x):
         # L'ostacolo viene riconosciuto in base alla funzione definita interpolando dei campioni (Ostacolo,Distanza), sarebbe (Area, Distanza)
 		# e che dunque associa ad un'area una distanza.
 
@@ -97,7 +97,7 @@ class Recognition:
 
 
 def main():
-    d = Recognition()
+    d = ObstacleRecognition()
     rospy.spin()
 
 

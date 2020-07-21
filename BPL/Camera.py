@@ -5,7 +5,7 @@ import rospy
 from cv_bridge import CvBridge
 from sensor_msgs.msg import CompressedImage,Image
 
-class CameraImage:
+class Camera:
 
     # 0 è default, cam principale
     def __init__(self,device=0):
@@ -17,15 +17,15 @@ class CameraImage:
         self.dev.set(4,240)
 	#Lancio un nodo ROS che pubblica sul topic "frame" un messaggio di tipo CompressedImage - scelto piuttosto che immagine standard
 	#cosi da velocizzare la trasmissione
-        self.pub = rospy.Publisher('frame', CompressedImage, queue_size=1)
-        rospy.init_node('camera', anonymous=True)
+        rospy.Publisher('image', CompressedImage, queue_size=1)
+        rospy.init_node('camera_node', anonymous=True)
         rate = rospy.Rate(10)
 
     def setup(self):
         if not self.dev.isOpened():
             self.dev.open(self.__devid)
 
-    def get_image(self, gray=False):
+    def readAndPublishFrame(self, gray=False):
         try:
             while not rospy.is_shutdown():
 		        #leggo i frame ricevuti - ret boolean ovvero se l'operazione di lettura va a buon fine, frame è l'immagine
@@ -40,12 +40,12 @@ class CameraImage:
                     self.pub.publish(frame)
         except rospy.ROSInterruptException, KeyboardInterrupt:
 	    #rilascio il device - quindi si spegne la cam
-            dev.release()
+            self.dev.release()
 
 def main(): 
     #Instanzio l'oggetto della classe CameraImage 
-    c = CameraImage()
-    c.get_image()
+    c = Camera()
+    c.readAndPublishFrame()
 
 
 if __name__ == '__main__':
