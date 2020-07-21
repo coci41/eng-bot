@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 import cv2
 import rospy
@@ -9,14 +10,14 @@ class Camera:
 
     # 0 è default, cam principale
     def __init__(self,device=0):
-	#Ricevo i frame dal device - apro la camera
+    #Ricevo i frame dal device - apro la camera
         self.dev = cv2.VideoCapture(device)
         self.__devid = device
-	#la risoluzione viene settata a 320x240 - a risoluzione bassa la trasmissione era più fluida e non laggava
+    #la risoluzione viene settata a 320x240 - a risoluzione bassa la trasmissione era più fluida e non laggava
         self.dev.set(3,320)	
         self.dev.set(4,240)
-	#Lancio un nodo ROS che pubblica sul topic "frame" un messaggio di tipo CompressedImage - scelto piuttosto che immagine standard
-	#cosi da velocizzare la trasmissione
+    #Lancio un nodo ROS che pubblica sul topic "frame" un messaggio di tipo CompressedImage - scelto piuttosto che immagine standard
+    #cosi da velocizzare la trasmissione
         rospy.Publisher('image', CompressedImage, queue_size=1)
         rospy.init_node('camera_node', anonymous=True)
         rate = rospy.Rate(10)
@@ -28,18 +29,18 @@ class Camera:
     def readAndPublishFrame(self, gray=False):
         try:
             while not rospy.is_shutdown():
-		        #leggo i frame ricevuti - ret boolean ovvero se l'operazione di lettura va a buon fine, frame è l'immagine
+                #leggo i frame ricevuti - ret boolean ovvero se l'operazione di lettura va a buon fine, frame è l'immagine
                 ret,frame= self.dev.read()
                 if ret:
                     if gray:
                         # se lo voglio grigio lo trasformo in scala di grigi
                         frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-		            #Converto il frame ricevuto nel tipo CompressedImage che poi verra' pubblicato nel topic
+                    #Converto il frame ricevuto nel tipo CompressedImage che poi verra' pubblicato nel topic
                     frame = CvBridge().cv2_to_compressed_imgmsg(frame, dst_format='jpg')
                     #Pubblico il frame sul topic frame
                     self.pub.publish(frame)
         except rospy.ROSInterruptException, KeyboardInterrupt:
-	    #rilascio il device - quindi si spegne la cam
+        #rilascio il device - quindi si spegne la cam
             self.dev.release()
 
 def main(): 

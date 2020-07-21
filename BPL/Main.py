@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 import cv2
 import numpy
@@ -78,17 +79,17 @@ def main():
             print("OSTACOLO DAVANTI!!!")
             # va a indietro e con l'ausilio dei sonar si ruota sul lato piu' libero
             m.back(50, 50)
-            if a.sonar_sx >= a.sonar_dx:
+            if a.sonarSx >= a.sonarDx:
                 m.forward(30, 50)
             else:
                 m.forward(50, 30)
 
         # se rileva un muro a destra o sinistra si gira leggermente verso la direzione opposta
-        elif (a.sonar_dx <= 20):
-            print("OSTACOLO A DESTRA : ", a.sonar_dx)
+        elif (a.sonarDx <= 20):
+            print("OSTACOLO A DESTRA : ", a.sonarDx)
             m.forward(30, 50)
-        elif (a.sonar_sx <= 20):
-            print("OSTACOLO A SINISTRA : ", a.sonar_sx)
+        elif (a.sonarSx <= 20):
+            print("OSTACOLO A SINISTRA : ", a.sonarSx)
             m.forward(50, 30)
 
         #se riconosce l'ostacolo, tramite l'angolo del centroide, si attiva la guida differenziale per scansare l'ostacolo

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 import RPi.GPIO as GPIO
 import rospy
 from std_msgs.msg import String, Int32

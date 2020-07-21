@@ -1,3 +1,4 @@
+# coding=utf-8
 '''
  In questo codice viene implementata la classe motor che va a definire i metodi che verranno utilizzati per il movimento del robot
 '''
