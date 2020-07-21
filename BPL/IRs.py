@@ -10,7 +10,8 @@ GPIO.setmode(GPIO.BCM)
 class IR:
 
     def __init__(self):
-        self.pins = [26] #codice più manutenibule, se voglio aggiungere IR basta aggiungere nell'array gli altri pin e andrà a creare tanti topic quanti sono gli IR - comportamento dinamico qualora voglia aggiungere altri IR
+        self.pins = [6] #codice più manutenibule, se voglio aggiungere IR basta aggiungere nell'array gli altri pin e andrà a creare tanti topic quanti sono gli IR - comportamento dinamico qualora voglia aggiungere altri IR
+        #PIN GPIO06 - OUTPUT - Nero
         if len(self.pins) == 0:
             print("No IR available")
             exit(-1)
