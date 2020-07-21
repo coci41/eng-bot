@@ -5,13 +5,13 @@
 import RPi.GPIO as GPIO
 from time import sleep
 
-inputSx1 = 27
-inputSx2 = 22
-enableSx = 17
+inputSx1 = 23
+inputSx2 = 24
+enableSx = 25
 
-inputDx1 = 24
-inputDx2 = 23
-enableDx = 25
+inputDx1 = 27
+inputDx2 = 22
+enableDx = 17
 
 class Controller:
 
