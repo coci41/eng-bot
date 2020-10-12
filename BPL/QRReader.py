@@ -8,9 +8,6 @@ from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import Int32
 from pyzbar.pyzbar import decode
 
-# questa classe legge dal topic 'frame', una volta elaborato con il range HSV desiderato, pubblica nel topic 'ostacolo'
-# l'angolo del centroide solo nel caso in cui l'ostacolo riconosciuto supera una certa distanza.
-
 class QRReader:
 
     def __init__(self):
@@ -27,31 +24,26 @@ class QRReader:
             # Converto il messaggio ricevuto
             img = self.bridge.compressed_imgmsg_to_cv2(data)
 
-            # trasforma in HSV
-            color = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+            cv2.imshow('IMG', img)
 
-            # trasforma in bianco e nero - PROVA?
-            gray = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
-            cv2.imshow('IMG', gray)
-
-            for barcode in decode(img):
-                myData = barcode.data.decode('utf-8')
-                #commento console
-                print(myData)
-
-                myOutput = 'ALT!!!'
-                myColor = (255, 0, 0)
-
-                pts = np.array([barcode.polygon], np.int32)
-                pts = pts.reshape((-1, 1, 2))
-                cv2.polylines(img, [pts], True, myColor, 5)
-                pts2 = barcode.rect
-                cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
-                            0.9, myColor, 2)
-
-                cv2.imshow('Result', img)
-
-                self.pub.publish(1)
+            # for barcode in decode(img):
+            #     myData = barcode.data.decode('utf-8')
+            #     #commento console
+            #     print(myData)
+            #
+            #     myOutput = 'ALT!!!'
+            #     myColor = (255, 0, 0)
+            #
+            #     pts = np.array([barcode.polygon], np.int32)
+            #     pts = pts.reshape((-1, 1, 2))
+            #     cv2.polylines(img, [pts], True, myColor, 5)
+            #     pts2 = barcode.rect
+            #     cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
+            #                 0.9, myColor, 2)
+            #
+            #     cv2.imshow('Result', img)
+            #
+            #     self.pub.publish(1)
 
         except CvBridgeError as e:
             print(e)
