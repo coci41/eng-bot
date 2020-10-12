@@ -24,26 +24,25 @@ class QRReader:
             # Converto il messaggio ricevuto
             img = self.bridge.compressed_imgmsg_to_cv2(data)
 
-            cv2.imshow('IMG', img)
+            for barcode in decode(img):
+                myData = barcode.data.decode('utf-8')
+                #commento console
+                print(myData)
 
-            # for barcode in decode(img):
-            #     myData = barcode.data.decode('utf-8')
-            #     #commento console
-            #     print(myData)
-            #
-            #     myOutput = 'ALT!!!'
-            #     myColor = (255, 0, 0)
-            #
-            #     pts = np.array([barcode.polygon], np.int32)
-            #     pts = pts.reshape((-1, 1, 2))
-            #     cv2.polylines(img, [pts], True, myColor, 5)
-            #     pts2 = barcode.rect
-            #     cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
-            #                 0.9, myColor, 2)
-            #
-            #     cv2.imshow('Result', img)
-            #
-            #     self.pub.publish(1)
+                myOutput = 'ALT!!!'
+                myColor = (255, 0, 0)
+
+                pts = np.array([barcode.polygon], np.int32)
+                pts = pts.reshape((-1, 1, 2))
+                cv2.polylines(img, [pts], True, myColor, 5)
+                pts2 = barcode.rect
+                cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.9, myColor, 2)
+
+                cv2.imshow('Result', img)
+
+                self.pub.publish(1)
+                cv2.waitKey(1)
 
         except CvBridgeError as e:
             print(e)
