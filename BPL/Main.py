@@ -14,11 +14,13 @@ from datetime import date
 class Main:
 
     def __init__(self, device=0):
+        # GPIO.BCM significa che ci riferendo ai pin con il numero "Broadcom SOC channel", questi sono i numeri dopo "GPIO"
         GPIO.setmode(GPIO.BCM)
         self.sonarDx = -1
         self.sonarSx = -1
-        self.angoloOstacolo = 1000
+        self.angoloOstacolo = None
         self.infrared = -1
+        self.qr = -1
         self.angoloDefault = -1
         self.subscribeAll()
 
@@ -31,13 +33,16 @@ class Main:
         rospy.Subscriber("infrared_1", Int32, self.getIRValue)
         rospy.Subscriber("sonar_1", Float64, self.getSonarDxValue)
         rospy.Subscriber("sonar_2", Float64, self.getSonarSxValue)
+        rospy.Subscriber("qr_reader", Int32, self.getQRValue)
 
-    # ************* FUNZIONI DI CALLBACK *********************
     def laneFollower(self, data):
         self.angoloDefault = data.data
 
     def getIRValue(self, data):
         self.infrared = data.data
+
+    def getQRValue(self, data):
+        self.qr = data.data
 
     def obstacleAvoidance(self, data):
         self.angoloOstacolo = data.data
@@ -48,60 +53,67 @@ class Main:
     def getSonarSxValue(self, data):
         self.sonarSx = data.data
 
-    # ***************** GUIDA DIFFERENZIALE ***********************
-    #la guida differenziale e' stata spiegata ampiamente nella relazione - la X è l'angolo e la m è l'istanza della classe motore
-    def guidaDifferenziale(self, X, m):
-        v_dx = 49.66585 + 0.01731602 * X + 0.001274749 * (X ** 2) - 0.00004329004 * (X ** 3)
-        v_sx = 49.66585 - 0.01731602 * X + 0.001274749 * (X ** 2) + 0.00004329004 * (X ** 3)
-        m.forward(dutyCycleDx=v_dx, dutyCycleSx=v_sx)
+    #angle è l'angolo di sterzata - c è l'istanza della classe Controller
+    def guidaDifferenziale(self, angle, c):
+        v_dx = 49.66585 + 0.01731602 * angle + 0.001274749 * (angle ** 2) - 0.00004329004 * (angle ** 3)
+        v_sx = 49.66585 - 0.01731602 * angle + 0.001274749 * (angle ** 2) + 0.00004329004 * (angle ** 3)
+        c.forward(dutyCycleDx=v_dx, dutyCycleSx=v_sx)
         return 1
 
-    # nel caso dell'ostacolo inverto i valori di dx e sx e vado in direzione opposta a quella che suggerisce il centroide
-    def guidaDifferenzialeOstacolo(self, X, m):
-        v_dx = 49.66585 + 0.01731602 * X + 0.001274749 * (X ** 2) - 0.00004329004 * (X ** 3)
-        v_sx = 49.66585 - 0.01731602 * X + 0.001274749 * (X ** 2) + 0.00004329004 * (X ** 3)
-        m.forward(dutyCycleDx=v_sx, dutyCycleSx=v_dx)
+    # se incontro un ostacolo inverto i dutyCycle in modo da andare nella direzione opposta a quella del centroide
+    # Il duty cycle è la frazione di tempo che un'entità passa in uno stato attivo in proporzione al tempo totale considerato
+    def guidaDifferenzialeOstacolo(self, angle, c):
+        v_dx = 49.66585 + 0.01731602 * angle + 0.001274749 * (angle ** 2) - 0.00004329004 * (angle ** 3)
+        v_sx = 49.66585 - 0.01731602 * angle + 0.001274749 * (angle ** 2) + 0.00004329004 * (angle ** 3)
+        c.forward(dutyCycleDx=v_sx, dutyCycleSx=v_dx)
         return 1
 
 
 def main():
 
-    # istanziamo l'oggetto per muovere i motori
-    m = controller.Controller()
+    c = controller.Controller()
 
     a = Main()
 
-    #******* COMPORTAMENTO REATTIVO DEL ROBOT ********
-    # CERCARE rospyshutdown finchè il canale è aperto
+    # COMPORTAMENTO REATTIVO
+    # (i comportamenti a livello più alto hanno priorità su quelli a livello più basso e prendono il controllo)
     while not rospy.is_shutdown():
-         #l'infrarosso ha priorita' maggiore, e' posizionato avanti
+        # PRIORITA' 0 - SENSO DI MARCIA ERRATO
+        if (a.qr == 1):
+            print("STO ANDANDO AL CONTRARIO!!!")
+            # TODO SCRIVERE LOGICA PER GIRARE DI 180°
+            # capovolgi()
+
+        # PRIORITA' 1 - INFRAROSSO DAVANTI
         if (a.infrared == 0):
             print("OSTACOLO DAVANTI!!!")
-            # va a indietro e con l'ausilio dei sonar si ruota sul lato piu' libero
-            m.back(50, 50)
+            c.back(50, 50)
+            # scelgo la direzione in base al lato più libero
             if a.sonarSx >= a.sonarDx:
-                m.forward(30, 50)
+                c.forward(30, 50)
             else:
-                m.forward(50, 30)
+                c.forward(50, 30)
 
-        # se rileva un muro a destra o sinistra si gira leggermente verso la direzione opposta
+        # PRIORITA' 2 - OSTACOLI LATERALI - RILEVAMENTO SONAR
         elif (a.sonarDx <= 20):
+            # se rilevo un ostacolo a DX vado a SX e viceversa
             print("OSTACOLO A DESTRA : ", a.sonarDx)
-            m.forward(30, 50)
+            c.forward(30, 50)
         elif (a.sonarSx <= 20):
             print("OSTACOLO A SINISTRA : ", a.sonarSx)
-            m.forward(50, 30)
+            c.forward(50, 30)
 
-        #se riconosce l'ostacolo, tramite l'angolo del centroide, si attiva la guida differenziale per scansare l'ostacolo
-        # quando a.ost e' 1000 significa che o non ha rilevato un ostacolo oppure e' troppo distante
-        elif a.angoloOstacolo != 1000:
+        # PRIORITA' 3 - RICONOSCIMENTO OSTACOLO - CAMERA
+        # al rilevamento dell'ostacolo attivo guidaDifferenzialeOstacolo()
+        elif a.angoloOstacolo != None:
             print("OSTACOLO IDENTIFICATO", a.angoloOstacolo)
-            M = a.guidaDifferenzialeOstacolo(a.angoloOstacolo, m)
+            a.guidaDifferenzialeOstacolo(a.angoloOstacolo, c)
+            a.angoloOstacolo = None
 
-        #se nessuno dei sensori si attiva, seguendo le linee bianche, prova a raggiungere la coordinata successiva
+        #PRIORITA' 4 - RICONOSCIMENTO CORSIE - CAMERA
         else:
             print("SEGUO LA CORSIA")
-            M = a.guidaDifferenziale(a.angoloDefault, m)
+            a.guidaDifferenziale(a.angoloDefault, c)
 
         time.sleep(0.1)
 
