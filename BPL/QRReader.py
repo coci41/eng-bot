@@ -27,6 +27,8 @@ class QRReader:
             # Converto il messaggio ricevuto
             img = self.bridge.compressed_imgmsg_to_cv2(data)
 
+            cv2.imshow('PROVA', img)
+
             for barcode in decode(img):
                 myData = barcode.data.decode('utf-8')
                 #commento console
@@ -41,6 +43,8 @@ class QRReader:
                 pts2 = barcode.rect
                 cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
                             0.9, myColor, 2)
+
+                cv2.imshow('Result', img)
 
                 self.pub.publish(1)
 
