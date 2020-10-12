@@ -27,6 +27,13 @@ class QRReader:
             # Converto il messaggio ricevuto
             img = self.bridge.compressed_imgmsg_to_cv2(data)
 
+            # trasforma in HSV
+            color = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+            # trasforma in bianco e nero - PROVA?
+            gray = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
+            cv2.imshow('IMG', gray)
+
             for barcode in decode(img):
                 myData = barcode.data.decode('utf-8')
                 #commento console
