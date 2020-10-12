@@ -29,19 +29,20 @@ class QRReader:
                 #commento console
                 print(myData)
 
-                myOutput = 'ALT!!!'
-                myColor = (255, 0, 0)
+                if myData == "ROBOT RETROFRONT":
+                    myOutput = 'ALT!!!'
+                    myColor = (0, 0, 255)
 
-                pts = np.array([barcode.polygon], np.int32)
-                pts = pts.reshape((-1, 1, 2))
-                cv2.polylines(img, [pts], True, myColor, 5)
-                pts2 = barcode.rect
-                cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
-                            0.9, myColor, 2)
+                    pts = np.array([barcode.polygon], np.int32)
+                    pts = pts.reshape((-1, 1, 2))
+                    cv2.polylines(img, [pts], True, myColor, 5)
+                    pts2 = barcode.rect
+                    cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
+                                0.9, myColor, 2)
 
-                cv2.imshow('Result', img)
+                    cv2.imshow('Result', img)
+                    self.pub.publish(1)
 
-                self.pub.publish(1)
                 cv2.waitKey(1)
 
         except CvBridgeError as e:
