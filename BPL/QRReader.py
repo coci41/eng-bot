@@ -18,7 +18,7 @@ class QRReader:
         self.bridge = CvBridge()
         self.pub = rospy.Publisher('qr_reader', Int32, queue_size=1)
         self.sub = rospy.Subscriber("image", CompressedImage, self.callback)
-        rospy.init_node('obstacle_recognition_node', anonymous=True)
+        rospy.init_node('qr_reader_node', anonymous=True)
         rate = rospy.Rate(10)
 
     def callback(self, data):
