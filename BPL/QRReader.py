@@ -49,6 +49,8 @@ class QRReader:
                 cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
                             0.9, myColor, 2)
 
+                cv2.imshow('Result', img)
+
                 self.pub.publish(1)
 
         except CvBridgeError as e:
