@@ -10,6 +10,7 @@ import RPi.GPIO as GPIO
 import csv
 from std_msgs.msg import Float64, Int32, Float32, Float32MultiArray
 from datetime import date
+import gpiozero
 
 class Main:
 
@@ -22,6 +23,8 @@ class Main:
         self.infrared = -1
         self.qr = -1
         self.angoloDefault = -1
+        self.robot = gpiozero.Robot(left=(24, 23, 25), right=(22, 27, 17))
+        self.turn_speed = 0.3
         self.subscribeAll()
 
         rospy.init_node('main', anonymous=True)
@@ -83,6 +86,11 @@ def main():
             print("STO ANDANDO AL CONTRARIO!!!")
             # TODO SCRIVERE LOGICA PER GIRARE DI 180°
             # capovolgi()
+            print("INIZIO A GIRARE A DESTRA!")
+            a.robot.right(a.turn_speed)
+            print("GIRO A DESTRA!")
+            time.sleep(3)
+            print("FINE TIME SLEEP")
 
         # PRIORITA' 1 - INFRAROSSO DAVANTI
         if (a.infrared == 0):
