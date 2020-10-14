@@ -53,15 +53,22 @@ class Controller:
         GPIO.output(inputDx2, GPIO.LOW)
 
     def back(self, dutyCycleDx=None, dutyCycleSx=None):
-
-        # CERCARE ChangeDutyCycle
-        # imposto prima la potenza del motore con ChangeDutyCycle e poi gli dico se andare avanti o indietro
         if dutyCycleDx != None and dutyCycleSx != None:
             self.powerDx.ChangeDutyCycle(dutyCycleDx)
             self.powerSx.ChangeDutyCycle(dutyCycleSx)
 
         GPIO.output(inputDx1, GPIO.LOW)
         GPIO.output(inputDx2, GPIO.HIGH)
+        GPIO.output(inputSx1, GPIO.LOW)
+        GPIO.output(inputSx2, GPIO.HIGH)
+
+    def rotate(self, dutyCycleDx=None, dutyCycleSx=None):
+        if dutyCycleDx != None and dutyCycleSx != None:
+            self.powerDx.ChangeDutyCycle(dutyCycleDx)
+            self.powerSx.ChangeDutyCycle(dutyCycleSx)
+
+        GPIO.output(inputDx1, GPIO.HIGH)
+        GPIO.output(inputDx2, GPIO.LOW)
         GPIO.output(inputSx1, GPIO.LOW)
         GPIO.output(inputSx2, GPIO.HIGH)
 

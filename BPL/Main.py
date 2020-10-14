@@ -87,7 +87,7 @@ def main():
             print("INIZIO A GIRARE A DESTRA!")
             start = time.time()
             while time.time() < start + 5:
-                c.forward(50,1)
+                c.rotate(50,50)
             print("FINE WHILE TIME")
 
         # PRIORITA' 1 - INFRAROSSO DAVANTI
