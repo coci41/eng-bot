@@ -49,7 +49,6 @@ class QRReader:
                     self.pub.publish(-1)
 
             if (control == False):
-                print("-1")
                 self.pub.publish(-1)
             cv2.waitKey(1)
 

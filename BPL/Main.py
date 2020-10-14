@@ -83,12 +83,10 @@ def main():
     while not rospy.is_shutdown():
         # PRIORITA' 0 - SENSO DI MARCIA ERRATO
         if (a.qr == 1):
-            print("STO ANDANDO AL CONTRARIO!!!")
-            print("INIZIO A GIRARE A DESTRA!")
+            print("STO ANDANDO AL CONTRARIO - ROTAZIONE DI 180°!!!")
             start = time.time()
             while time.time() < start + 5:
                 c.rotate(50,50)
-            print("FINE WHILE TIME")
 
         # PRIORITA' 1 - INFRAROSSO DAVANTI
         if (a.infrared == 0):
