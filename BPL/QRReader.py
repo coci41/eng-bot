@@ -23,6 +23,7 @@ class QRReader:
 
             # Converto il messaggio ricevuto
             img = self.bridge.compressed_imgmsg_to_cv2(data)
+            control = False
 
             for barcode in decode(img):
                 myData = barcode.data.decode('utf-8')
@@ -30,6 +31,7 @@ class QRReader:
                 print(myData)
 
                 if myData == "ROBOT RETROFRONT":
+                    control = True
                     myOutput = 'ALT!!!'
                     myColor = (0, 0, 255)
 
@@ -43,9 +45,16 @@ class QRReader:
                     cv2.imshow('Result', img)
                     self.pub.publish(1)
                 else:
+                    control = False
                     self.pub.publish(-1)
 
-                cv2.waitKey(1)
+            if (control == False):
+                print("-1")
+                self.pub.publish(-1)
+            cv2.waitKey(1)
+
+
+
 
         except CvBridgeError as e:
             print(e)
