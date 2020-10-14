@@ -42,6 +42,8 @@ class QRReader:
 
                     cv2.imshow('Result', img)
                     self.pub.publish(1)
+                else:
+                    self.pub.publish(-1)
 
                 cv2.waitKey(1)
 

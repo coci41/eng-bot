@@ -84,13 +84,11 @@ def main():
         # PRIORITA' 0 - SENSO DI MARCIA ERRATO
         if (a.qr == 1):
             print("STO ANDANDO AL CONTRARIO!!!")
-            # TODO SCRIVERE LOGICA PER GIRARE DI 180°
-            # capovolgi()
             print("INIZIO A GIRARE A DESTRA!")
-            a.robot.right(a.turn_speed)
-            print("GIRO A DESTRA!")
-            time.sleep(3)
-            print("FINE TIME SLEEP")
+            start = time.time()
+            while time.time() < start + 5:
+                c.forward(50,1)
+            print("FINE WHILE TIME")
 
         # PRIORITA' 1 - INFRAROSSO DAVANTI
         if (a.infrared == 0):
